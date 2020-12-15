@@ -1,0 +1,97 @@
+Create table Estudiante
+(
+ id_estudiante integer PRIMARY KEY,
+ nombre text,
+ ci numeric,
+ apellidoP text,
+ apellidoM text
+);
+
+Create table Docente
+(
+  id_docente integer PRIMARY KEY,
+  nombre text,
+  apellidoP text,
+  apellidoM text,
+  titulo text
+);
+
+Create table Materia
+(
+  id_materia integer PRIMARY KEY,
+  nombreM text,
+  siglaM text,
+  id_docente integer,
+  CONSTRAINT FK_Docente FOREIGN KEY (id_docente) 
+  REFERENCES Docente(id_docente) 
+);
+Create table Matricula
+(
+   id_materia integer,
+   id_estudiante integer,
+   CONSTRAINT FK_Matricula_Materia FOREIGN KEY (id_materia) 
+   REFERENCES Materia(id_materia),
+   
+   CONSTRAINT FK_Matricula_Estudiante FOREIGN KEY (id_estudiante) 
+   REFERENCES Estudiante(id_estudiante)
+);
+
+insert into Estudiante (id_estudiante,nombre,ci,apellidoP,apellidoM)
+values('111','Jorge','8315617','Mamani','Lima');
+
+insert into Estudiante (id_estudiante,nombre,ci,apellidoP,apellidoM)
+values('112','Juan','9314617','Mendoza','Pedraza'),
+('113','Maria','3325611','Rodriguez','Galarreta'),
+('114','Jose','4316614','Ayllon','Gomez'),
+('115','Mario','6315815','Gutierrez','Vazquez');
+
+insert into Docente (id_docente,nombre,apellidoP,apellidoM,titulo)
+values('1000','Pedro','Martinez','Mendoza','M. Sc.'),
+('1001','Carlos','Gutierrez','Rodriguez','PhD'),
+('1002','Israel','Galarreta','Lima','Licenciado'),
+('1003','Lucia','Tarqui','Gutierrez','PhD');
+
+insert into Materia(id_materia,nombreM,siglaM,id_docente)
+values('10','Base de Datos','INF-272','1000'),
+('11','Calculo','MAT-125','1001'),
+('12','Programacion I','INF-111','1000'),
+('13','Fisica I','FIS-132','1002'),
+('14','Algebra I','MAT-115','1001'),
+('15','Algebra II','MAT-215','1003');
+
+insert into Matricula(id_materia,id_estudiante)
+values
+('10','111'),
+('11','112'),
+('11','113'),
+('11','114'),
+('14','112'),
+('14','113'),
+('14','114'),
+('12','112'),
+('12','113'),
+('12','114'),
+('13','115'),
+('15','115'),
+('15','111'),
+('15','112');
+
+SELECT m.siglaM Sigla,m.nombreM Materia
+FROM Estudiante e,Materia m, Matricula ma
+where e.ci=8315617 AND e.id_estudiante=ma.id_estudiante AND
+      m.id_materia=ma.id_materia
+
+CREATE OR REPLACE FUNCTION consulta_ci(numeric)
+RETURNS table (Sigla text, Materia text) AS
+$$
+BEGIN
+    RETURN query
+        SELECT m.siglaM ,m.nombreM 
+        FROM Estudiante e,Materia m, Matricula ma
+        where e.ci=$1 AND e.id_estudiante=ma.id_estudiante AND
+        m.id_materia=ma.id_materia;
+END;
+$$
+LANGUAGE plpgsql 
+
+select * from consulta_ci(8315617);
